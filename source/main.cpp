@@ -281,22 +281,20 @@ static void LoadBeatmap(char path[]) {
         token = strtok(NULL, ",");
         int type = atoi(token);
 
-		// Create a new hit object
-		std::shared_ptr<HitObject> hitObject;
-
-		// Check if the hit object is a circle or a slider
         std::string binary = std::bitset<8>(type).to_string();
-        if (binary[7] == '1') {
-			hitObject = std::make_shared<Circle>();
-		} else if (binary[6] == '1') {
-			hitObject = std::make_shared<Slider>();
-		}
-
-		hitObject->x = x;
-		hitObject->y = y;
-		hitObject->time = time;
-
-		hitObjects.push_back(hitObject);
+        if (binary[7] == '1') { // Circle
+            std::shared_ptr<HitObject> hitObject = std::make_shared<Circle>();
+            hitObject->x = x;
+            hitObject->y = y;
+            hitObject->time = time;
+            hitObjects.push_back(hitObject);
+        } else if (binary[6] == '1') { // Slider
+            std::shared_ptr<HitObject> hitObject = std::make_shared<Slider>();
+            hitObject->x = x;
+            hitObject->y = y;
+            hitObject->time = time;
+            hitObjects.push_back(hitObject);
+        }
 
     }
 
