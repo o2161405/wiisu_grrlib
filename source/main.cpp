@@ -16,6 +16,8 @@
 #include <memory>
 #include <bitset>
 
+#include "HitObject.hpp"
+
 #define APPROACH_RATE_MS 400
 
 static u8 CalculateFrameRate(void);
@@ -43,46 +45,6 @@ int songSelection = 0;
 u32 startTime = 0;
 u32 currentTime = 0;
 
-class HitObject {
-	public:
-		int x;
-		int y;
-		int time;
-        virtual ~HitObject() = default;
-
-        virtual bool isHit(int cursorX, int cursorY) { return false; }
-
-        virtual void draw() {}
-};
-
-class Circle : public HitObject {
-	public:
-		virtual ~Circle() = default;
-
-        bool isHit(int cursorX, int cursorY) override {
-            return false;
-        }
-
-        void draw() override {
-			GRRLIB_Circle(x, y, 10, 0xFFFFFFFF, true);
-		}
-};
-
-class Slider : public HitObject {
-	public:
-		virtual ~Slider() = default;
-
-        bool isHit(int cursorX, int cursorY) override {
-            return false;
-        }
-
-        void draw() override {
-            GRRLIB_Circle(x, y, 10, 0xFFFFFFFF, true);
-		}
-};
-
-std::vector<std::shared_ptr<HitObject>> hitObjects;
-
 
 int main(int argc, char **argv) {
     bool ShowFPS = true;
@@ -91,7 +53,7 @@ int main(int argc, char **argv) {
     InitializeWPAD();
     fatInitDefault();
 
-    #include "assets.hpp"
+    #include "Assets.hpp"
 
     ScreenState CurrentScreen = ScreenState::MENU;
 

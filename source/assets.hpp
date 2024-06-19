@@ -37,4 +37,3 @@ static GRRLIB_texImg* hitcircle = GRRLIB_LoadTexture(hitcircle_png);
 GRRLIB_SetHandle(hitcircle, hitcircle->w / 2, hitcircle->h / 2);
 static GRRLIB_texImg* approachcircle = GRRLIB_LoadTexture(approachcircle_png);
 GRRLIB_SetHandle(approachcircle, approachcircle->w / 2, approachcircle->h / 2);
-
