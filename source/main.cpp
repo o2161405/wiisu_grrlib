@@ -77,7 +77,6 @@ class Slider : public HitObject {
         }
 
         void draw() override {
-			// Draw the word "Slider" at the x and y position
             GRRLIB_Circle(x, y, 10, 0xFFFFFFFF, true);
 		}
 };
