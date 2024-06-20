@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <wiiuse/wpad.h>
-#include <ogc/lwp_watchdog.h>   // Needed for gettime and ticks_to_millisecs
 #include <math.h>
 
 #include <fat.h>
@@ -17,6 +16,7 @@
 #include <bitset>
 
 #include "HitObject.hpp"
+#include "Clock.hpp"
 
 #define APPROACH_RATE_MS 400
 
@@ -42,9 +42,8 @@ std::vector<std::string> artistNames;
 std::vector<std::string> folderNames;
 
 int songSelection = 0;
-u32 startTime = 0;
-u32 currentTime = 0;
 
+Clock beatmapclock;
 
 int main(int argc, char **argv) {
     bool ShowFPS = true;
@@ -119,6 +118,7 @@ int main(int argc, char **argv) {
                     // Replace this with the path to the song folder
                     LoadBeatmap("sd:/apps/wiisu/Songs/1047286 Dance Gavin Dance - Son of Robot/Dance Gavin Dance - Son of Robot (Alumetri) [Catharsis].osu");
                     CurrentScreen = ScreenState::GAME;
+                    beatmapclock.start();
 				}
 
 				break;
@@ -126,12 +126,10 @@ int main(int argc, char **argv) {
 
             case ScreenState::GAME: {
 
-                if (startTime == 0) startTime = ticks_to_millisecs(gettime());
-                int currentTime = abs(static_cast<int>(startTime - ticks_to_millisecs(gettime()))) - 2000;
+                beatmapclock.update();
 
-                // Draw the hit objects
                 for (int i = 0; i < static_cast<int>(hitObjects.size()); i++) {
-					if (hitObjects[i]->time < currentTime) {
+                    if (hitObjects[i]->time < beatmapclock.currentTime) {
 						hitObjects[i]->draw();
 					}
 				}
@@ -141,7 +139,7 @@ int main(int argc, char **argv) {
                 snprintf(buffer, sizeof(buffer), "Current Song: %s by %s", songNames[songSelection].c_str(), artistNames[songSelection].c_str());
                 GRRLIB_PrintfTTF(10, 10, Font, buffer, 12, 0xFFFFFFFF);
                 char buffer2[255];
-                snprintf(buffer2, sizeof(buffer2), "Time: %d", currentTime);
+                snprintf(buffer2, sizeof(buffer2), "Time: %d", beatmapclock.currentTime);
                 GRRLIB_PrintfTTF(10, 25, Font, buffer2, 12, 0xFFFFFFFF);
 
                 break;
@@ -281,19 +279,17 @@ static void LoadBeatmap(char* path) {
 
         std::string binary = std::bitset<8>(type).to_string();
         if (binary[7] == '1') { // Circle
-            std::shared_ptr<HitObject> hitObject = std::make_shared<Circle>();
-            hitObject->x = x;
-            hitObject->y = y;
-            hitObject->time = time;
-            hitObjects.push_back(hitObject);
+            std::shared_ptr<Circle> circle = std::make_shared<Circle>();
+            circle->x = x;
+            circle->y = y;
+            circle->time = time;
+            hitObjects.push_back(circle);
         } else if (binary[6] == '1') { // Slider
-            std::shared_ptr<HitObject> hitObject = std::make_shared<Slider>();
-            hitObject->x = x;
-            hitObject->y = y;
-            hitObject->time = time;
+            std::shared_ptr<Slider> slider = std::make_shared<Slider>();
+            slider->x = x;
+            slider->y = y;
+            slider->time = time;
 
-            // Dynamic cast to set curve type and points
-            std::shared_ptr<Slider> slider = std::dynamic_pointer_cast<Slider>(hitObject);
             token = strtok(NULL, ",");
             slider->curveType = token[0];
 
@@ -304,10 +300,8 @@ static void LoadBeatmap(char* path) {
                 points.push_back(std::make_pair(pointX, pointY));
             }
             slider->curvePoints = points;
-            
-            
 
-            hitObjects.push_back(hitObject);
+            hitObjects.push_back(slider);
         }
 
     }
