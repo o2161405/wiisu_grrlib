@@ -4,14 +4,15 @@
 
 class HitObject {
 public:
-    int x;
-    int y;
-    int time;
     virtual ~HitObject() = default;
 
     virtual bool isHit(int cursorX, int cursorY) { return false; }
 
     virtual void draw() {}
+
+    int x;
+    int y;
+    int time;
 };
 
 class Circle : public HitObject {
@@ -23,7 +24,7 @@ public:
     }
 
     void draw() override {
-        GRRLIB_Circle(x + 64, y + 48, 10, 0xFFFFFFFF, true);
+        GRRLIB_Circle(x + 64, y + 48, 10, 0xED6911FF, true);
     }
 };
 
@@ -36,8 +37,11 @@ public:
     }
 
     void draw() override {
-        GRRLIB_Circle(x + 64, y + 48, 10, 0xFFFFFFFF, true);
+        GRRLIB_Circle(x + 64, y + 48, 10, 0x0EE3A3FF, true);
     }
+
+    char curveType;
+    std::vector<std::pair<int, int>> curvePoints;
 };
 
 std::vector<std::shared_ptr<HitObject>> hitObjects;

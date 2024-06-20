@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
 
             case ScreenState::SONG_SELECT: {
 
-                for (int i = 0; i < songNames.size(); i++) {
+                for (int i = 0; i < static_cast<int>(songNames.size()); i++) {
                     char buffer[255];
 
                     //snprintf(buffer, sizeof(buffer), "%s by %s", songNames[i].c_str(), artistNames[i].c_str());
@@ -126,13 +126,11 @@ int main(int argc, char **argv) {
 
             case ScreenState::GAME: {
 
-                float circleScale = 0.8f;
-
                 if (startTime == 0) startTime = ticks_to_millisecs(gettime());
                 int currentTime = abs(static_cast<int>(startTime - ticks_to_millisecs(gettime()))) - 2000;
 
                 // Draw the hit objects
-                for (int i = 0; i < hitObjects.size(); i++) {
+                for (int i = 0; i < static_cast<int>(hitObjects.size()); i++) {
 					if (hitObjects[i]->time < currentTime) {
 						hitObjects[i]->draw();
 					}
@@ -249,7 +247,7 @@ static void GetSongFolder(void) {
     }
 }
 
-static void LoadBeatmap(char path[]) {
+static void LoadBeatmap(char* path) {
 
     // Clear the hit objects vector
     hitObjects.clear();
@@ -293,14 +291,30 @@ static void LoadBeatmap(char path[]) {
             hitObject->x = x;
             hitObject->y = y;
             hitObject->time = time;
+
+            // Dynamic cast to set curve type and points
+            std::shared_ptr<Slider> slider = std::dynamic_pointer_cast<Slider>(hitObject);
+            token = strtok(NULL, ",");
+            slider->curveType = token[0];
+
+            std::vector<std::pair<int, int>> points;
+            while ((token = strtok(NULL, "|")) != NULL) {
+                int pointX, pointY;
+                sscanf(token, "%d:%d", &pointX, &pointY);
+                points.push_back(std::make_pair(pointX, pointY));
+            }
+            slider->curvePoints = points;
+            
+            
+
             hitObjects.push_back(hitObject);
         }
 
     }
 
-    // Normalize the time of the hit objects to the first object's time
+    // Normalize time to 0
     int firstObjectTime = hitObjects[0]->time;
-    for (int i = 0; i < hitObjects.size(); i++) {
+    for (int i = 0; i < static_cast<int>(hitObjects.size()); i++) {
         hitObjects[i]->time -= firstObjectTime;
     }
 
