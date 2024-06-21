@@ -285,15 +285,13 @@ static void LoadBeatmap(char* path) {
             std::shared_ptr<Slider> slider = std::make_shared<Slider>(x, y, time);
 
             token = strtok(NULL, ",");
-            slider->curveType = token[0];
+            slider->setCurveType(token[0]);
 
-            std::vector<std::pair<int, int>> points;
             while ((token = strtok(NULL, "|")) != NULL) {
                 int pointX, pointY;
                 sscanf(token, "%d:%d", &pointX, &pointY);
-                points.push_back(std::make_pair(pointX, pointY));
+                slider->addCurvePoint(pointX, pointY);
             }
-            slider->curvePoints = points;
 
             hitObjects.push_back(slider);
         }

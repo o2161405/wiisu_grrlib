@@ -52,6 +52,15 @@ public:
         GRRLIB_Circle(x + 64, y + 48, 10, 0x0EE3A3FF, true);
     }
 
+    void setCurveType(char curveType) {
+		this->curveType = curveType;
+	}
+
+    void addCurvePoint(int x, int y) {
+		curvePoints.push_back(std::make_pair(x, y));
+	}
+
+private:
     char curveType;
     std::vector<std::pair<int, int>> curvePoints;
 };
