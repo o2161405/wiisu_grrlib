@@ -17,14 +17,12 @@
 
 #include "HitObject.hpp"
 #include "Clock.hpp"
-
-#define APPROACH_RATE_MS 400
+#include "Wiimote.hpp"
 
 static u8 CalculateFrameRate(void);
 static bool isHoveringOverLogo(int cursorX, int cursorY);
 static void drawCursor(int x, int y);
 static void InitializeGRRLIB(void);
-static void InitializeWPAD(void);
 static void GetSongFolder(void);
 static void LoadBeatmap(char* path);
 
@@ -49,21 +47,19 @@ int main(int argc, char **argv) {
     bool ShowFPS = true;
 
     InitializeGRRLIB();
-    InitializeWPAD();
     fatInitDefault();
 
     #include "Assets.hpp"
 
     ScreenState CurrentScreen = ScreenState::MENU;
 
+    Wiimote wiimote;
+
     GetSongFolder();
 
     while(1) {
 
-		WPAD_ScanPads();
-
-        ir_t WiimoteIR;
-        WPAD_IR(WPAD_CHAN_0, &WiimoteIR);
+		wiimote.Update();
 
         switch (CurrentScreen) {
             case ScreenState::MENU: {
@@ -72,17 +68,17 @@ int main(int argc, char **argv) {
 
                 GRRLIB_DrawImg(0, 0, Background, 0, 4, 4, 0xFFFFFFFF);
                 GRRLIB_DrawImg(-172, -226, Background_Circles, wiisu_logo_scale/2, 1, 1, 0xFFFFFF20); // Rotates Slowly
-                GRRLIB_DrawImg(0 - (WiimoteIR.x * 0.01), -118 - (WiimoteIR.y * 0.01), Background_Lines_Big, 0, 1, 1, 0xFFFFFFFF); // Parallax Effect
-                GRRLIB_DrawImg(-65 - (WiimoteIR.x * 0.05), -82 - (WiimoteIR.y * 0.05), Background_Lines_Medium, 0, 1, 1, 0xFFFFFFFF);
-                GRRLIB_DrawImg(-50 - (WiimoteIR.x * 0.1), -30 - (WiimoteIR.y * 0.1), Background_Lines_Small, 0, 1, 1, 0xFFFFFFFF);
+                GRRLIB_DrawImg(0 - (wiimote.GetX() * 0.01), -118 - (wiimote.GetY() * 0.01), Background_Lines_Big, 0, 1, 1, 0xFFFFFFFF); // Parallax Effect
+                GRRLIB_DrawImg(-65 - (wiimote.GetX() * 0.05), -82 - (wiimote.GetY() * 0.05), Background_Lines_Medium, 0, 1, 1, 0xFFFFFFFF);
+                GRRLIB_DrawImg(-50 - (wiimote.GetX() * 0.1), -30 - (wiimote.GetY() * 0.1), Background_Lines_Small, 0, 1, 1, 0xFFFFFFFF);
 
 
                 GRRLIB_DrawImg(5, 5, SettingsImage, 0, 0.8f, 0.8f, 0xFFFFFFFF);
                 GRRLIB_DrawImg(120, 40, Wiisu, 0, normalized_logo_scale, normalized_logo_scale, 0xFFFFFFFF);
 
-                if (isHoveringOverLogo(WiimoteIR.x, WiimoteIR.y)) {
+                if (isHoveringOverLogo(wiimote.GetX(), wiimote.GetY())) {
 
-                    if (WPAD_ButtonsDown(0) & WPAD_BUTTON_A) {
+                    if (wiimote.IsButtonPressed(WPAD_BUTTON_A)) {
                         CurrentScreen = ScreenState::SONG_SELECT;
                         
                     }
@@ -110,11 +106,11 @@ int main(int argc, char **argv) {
 
 				}
 
-                if (WPAD_ButtonsHeld(0) & WPAD_BUTTON_DOWN) songSelection += 1;
+                if (wiimote.IsButtonPressed(WPAD_BUTTON_DOWN)) songSelection += 1;
 
-                if (WPAD_ButtonsHeld(0) & WPAD_BUTTON_UP) songSelection -= 1;
+                if (wiimote.IsButtonPressed(WPAD_BUTTON_UP)) songSelection -= 1;
 
-                if (WPAD_ButtonsHeld(0) & WPAD_BUTTON_A) {
+                if (wiimote.IsButtonPressed(WPAD_BUTTON_A)) {
                     // Replace this with the path to the song folder
                     LoadBeatmap("sd:/apps/wiisu/Songs/1047286 Dance Gavin Dance - Son of Robot/Dance Gavin Dance - Son of Robot (Alumetri) [Catharsis].osu");
                     CurrentScreen = ScreenState::GAME;
@@ -151,7 +147,7 @@ int main(int argc, char **argv) {
                 }
 		}
 
-		drawCursor(WiimoteIR.x, WiimoteIR.y);
+		drawCursor(wiimote.GetX(), wiimote.GetY());
 
         if (ShowFPS) {
             char FPS[255];
@@ -160,7 +156,9 @@ int main(int argc, char **argv) {
             GRRLIB_PrintfTTF(500, 25, Font, FPS, 12, 0xFFFFFFFF);
         }
 
-        if (WPAD_ButtonsDown(0) & WPAD_BUTTON_HOME) break;
+        if (wiimote.IsButtonPressed(WPAD_BUTTON_HOME)) {
+            break;
+        }
 
         GRRLIB_Render();  
     }
@@ -210,12 +208,6 @@ static void InitializeGRRLIB(void) {
     GRRLIB_Init();
     GRRLIB_SetBackgroundColour(0x00, 0x00, 0x00, 0xFF);
     GRRLIB_SetAntiAliasing(true);
-}
-
-static void InitializeWPAD(void) {
-    WPAD_Init();
-    WPAD_SetDataFormat(WPAD_CHAN_0, WPAD_FMT_BTNS_ACC_IR);
-    WPAD_SetVRes(0, 640, 480);
 }
 
 static void GetSongFolder(void) {
