@@ -1,15 +1,25 @@
 #pragma once
 
-#include <memory>
-
 class HitObject {
 public:
+    HitObject(int x, int y, int time) : x(x), y(y), time(time) {}
     virtual ~HitObject() = default;
 
-    virtual bool isHit(int cursorX, int cursorY) { return false; }
+    virtual bool isHit(int cursorX, int cursorY) {
+        return false;
+    }
 
     virtual void draw() {}
 
+    int getTime() {
+        return time;
+    }
+
+    void setTime(int time) {
+        this->time = time;
+    }
+
+protected:
     int x;
     int y;
     int time;
@@ -17,7 +27,8 @@ public:
 
 class Circle : public HitObject {
 public:
-    virtual ~Circle() = default;
+    Circle(int x, int y, int time) : HitObject(x, y, time) {}
+    ~Circle() = default;
 
     bool isHit(int cursorX, int cursorY) override {
         return false;
@@ -30,7 +41,8 @@ public:
 
 class Slider : public HitObject {
 public:
-    virtual ~Slider() = default;
+    Slider(int x, int y, int time) : HitObject(x, y, time) {}
+    ~Slider() = default;
 
     bool isHit(int cursorX, int cursorY) override {
         return false;

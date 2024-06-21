@@ -20,6 +20,12 @@ public:
         }
     }
 
+    void stop() {
+		if (isRunning) {
+			isRunning = false;
+		}
+	}
+
     void update() {
         if (isRunning) {
             currentTime = abs(static_cast<int>(startTime - ticks_to_millisecs(gettime()))) - 2000;
@@ -30,6 +36,7 @@ public:
         return currentTime;
     }
 
+private:
     int startTime;
     int currentTime;
     bool isRunning;

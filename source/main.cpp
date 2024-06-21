@@ -127,19 +127,19 @@ int main(int argc, char **argv) {
             case ScreenState::GAME: {
 
                 beatmapclock.update();
+                int currentTime = beatmapclock.getTime();
 
                 for (int i = 0; i < static_cast<int>(hitObjects.size()); i++) {
-                    if (hitObjects[i]->time < beatmapclock.currentTime) {
+                    if (hitObjects[i]->getTime() < currentTime) {
 						hitObjects[i]->draw();
 					}
 				}
-
 
                 char buffer[255];
                 snprintf(buffer, sizeof(buffer), "Current Song: %s by %s", songNames[songSelection].c_str(), artistNames[songSelection].c_str());
                 GRRLIB_PrintfTTF(10, 10, Font, buffer, 12, 0xFFFFFFFF);
                 char buffer2[255];
-                snprintf(buffer2, sizeof(buffer2), "Time: %d", beatmapclock.currentTime);
+                snprintf(buffer2, sizeof(buffer2), "Time: %d", currentTime);
                 GRRLIB_PrintfTTF(10, 25, Font, buffer2, 12, 0xFFFFFFFF);
 
                 break;
@@ -279,16 +279,10 @@ static void LoadBeatmap(char* path) {
 
         std::string binary = std::bitset<8>(type).to_string();
         if (binary[7] == '1') { // Circle
-            std::shared_ptr<Circle> circle = std::make_shared<Circle>();
-            circle->x = x;
-            circle->y = y;
-            circle->time = time;
+            std::shared_ptr<Circle> circle = std::make_shared<Circle>(x, y, time);
             hitObjects.push_back(circle);
         } else if (binary[6] == '1') { // Slider
-            std::shared_ptr<Slider> slider = std::make_shared<Slider>();
-            slider->x = x;
-            slider->y = y;
-            slider->time = time;
+            std::shared_ptr<Slider> slider = std::make_shared<Slider>(x, y, time);
 
             token = strtok(NULL, ",");
             slider->curveType = token[0];
@@ -307,9 +301,9 @@ static void LoadBeatmap(char* path) {
     }
 
     // Normalize time to 0
-    int firstObjectTime = hitObjects[0]->time;
+    int firstObjectTime = hitObjects[0]->getTime();
     for (int i = 0; i < static_cast<int>(hitObjects.size()); i++) {
-        hitObjects[i]->time -= firstObjectTime;
+        hitObjects[i]->setTime(hitObjects[i]->getTime() - firstObjectTime);
     }
 
 	fclose(file);
