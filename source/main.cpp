@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
 
     while(1) {
 
-		wiimote.Update();
+        wiimote.Update();
 
         switch (CurrentScreen) {
             case ScreenState::MENU: {
@@ -92,7 +92,7 @@ int main(int argc, char **argv) {
                 }
 
                 wiisu_logo_scale += 0.015f;
-				break;
+                break;
             }
 
             case ScreenState::SONG_SELECT: {
@@ -107,11 +107,11 @@ int main(int argc, char **argv) {
 
                     if (i != songSelection) {
                         GRRLIB_Rectangle(0, 0 + (i * 50), 50, 10, 0xFFFFFFFF, false);
-					} else {
-						GRRLIB_Rectangle(0, 0 + (i * 50), 50, 10, 0xFFFFFFFF, true);
-					}
+                    } else {
+                        GRRLIB_Rectangle(0, 0 + (i * 50), 50, 10, 0xFFFFFFFF, true);
+                    }
 
-				}
+                }
 
                 if (wiimote.IsButtonPressed(WPAD_BUTTON_DOWN)) songSelection += 1;
 
@@ -122,10 +122,10 @@ int main(int argc, char **argv) {
                     LoadBeatmap("sd:/apps/wiisu/Songs/1047286 Dance Gavin Dance - Son of Robot/Dance Gavin Dance - Son of Robot (Alumetri) [Catharsis].osu");
                     CurrentScreen = ScreenState::GAME;
                     beatmapclock.start();
-				}
+                }
 
-				break;
-			}
+                break;
+            }
 
             case ScreenState::GAME: {
 
@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
 
                 for (int i = 0; i < static_cast<int>(hitObjects.size()); i++) {
                     hitObjects[i]->draw(currentTime);
-				}
+                }
 
                 char buffer[255];
                 snprintf(buffer, sizeof(buffer), "Current Song: %s by %s", songNames[songSelection].c_str(), artistNames[songSelection].c_str());
@@ -150,9 +150,9 @@ int main(int argc, char **argv) {
                 GRRLIB_PrintfTTFW(10, 10, Font, L"You haven't set a state for the game.", 24, 0xFFFFFFFF);
                 break;
                 }
-		}
+        }
 
-		drawCursor(wiimote.GetX(), wiimote.GetY());
+        drawCursor(wiimote.GetX(), wiimote.GetY());
 
         if (ShowFPS) {
             char FPS[255];
@@ -265,12 +265,12 @@ static void LoadBeatmap(char *path) {
     while (fgets(line, sizeof(line), file)) {
 
         // Parse the line
-		char* token = strtok(line, ",");
-		int x = atoi(token);
-		token = strtok(NULL, ",");
-		int y = atoi(token);
-		token = strtok(NULL, ",");
-		int time = atoi(token);
+        char* token = strtok(line, ",");
+        int x = atoi(token);
+        token = strtok(NULL, ",");
+        int y = atoi(token);
+        token = strtok(NULL, ",");
+        int time = atoi(token);
         token = strtok(NULL, ",");
         int type = atoi(token);
         token = strtok(NULL, ",");
@@ -310,6 +310,6 @@ static void LoadBeatmap(char *path) {
         hitObjects[i]->setTime(hitObjects[i]->getTime() - firstObjectTime);
     }
 
-	fclose(file);
+    fclose(file);
 }
 
