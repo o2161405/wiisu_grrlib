@@ -15,18 +15,19 @@
 #include <memory>
 #include <bitset>
 
+#include <fstream>
+#include <sstream>
+
 #include "HitObject.hpp"
 #include "Clock.hpp"
 #include "Wiimote.hpp"
-
-#define APPROACH_RATE_MS 400
 
 static u8 CalculateFrameRate(void);
 static bool isHoveringOverLogo(int cursorX, int cursorY);
 static void drawCursor(int x, int y);
 static void InitializeGRRLIB(void);
 static void GetSongFolder(void);
-static void LoadBeatmap(char* path);
+static void LoadBeatmap(char *path);
 
 float wiisu_logo_scale = 1.0f;
 
@@ -43,6 +44,11 @@ std::vector<std::string> folderNames;
 int songSelection = 0;
 
 BeatmapClock beatmapclock;
+
+double approachRate = 9.5f;
+double circleSize = 2.5f;
+double overallDifficulty = 9.2f;
+double hpDrainRate = 4.2f;
 
 int main(int argc, char **argv) {
     bool ShowFPS = true;
@@ -127,9 +133,7 @@ int main(int argc, char **argv) {
                 int currentTime = beatmapclock.getTime();
 
                 for (int i = 0; i < static_cast<int>(hitObjects.size()); i++) {
-                    if (abs(hitObjects[i]->getTime() - currentTime) < APPROACH_RATE_MS) {
-                        hitObjects[i]->draw();
-					}
+                    hitObjects[i]->draw(currentTime);
 				}
 
                 char buffer[255];
@@ -238,7 +242,7 @@ static void GetSongFolder(void) {
     }
 }
 
-static void LoadBeatmap(char* path) {
+static void LoadBeatmap(char *path) {
 
     // Clear the hit objects vector
     hitObjects.clear();
@@ -273,20 +277,21 @@ static void LoadBeatmap(char* path) {
 
         std::string binary = std::bitset<8>(type).to_string();
         if (binary[7] == '1') { // Circle
-            std::shared_ptr<Circle> circle = std::make_shared<Circle>(x, y, time);
+            std::shared_ptr<Circle> circle = std::make_shared<Circle>(x, y, time, circleSize, approachRate, overallDifficulty, hpDrainRate);
             hitObjects.push_back(circle);
         } else if (binary[6] == '1') { // Slider
-            std::shared_ptr<Slider> slider = std::make_shared<Slider>(x, y, time);
+            std::shared_ptr<Slider> slider = std::make_shared<Slider>(x, y, time, 2.5f, 9.5f, 9.2f, 4.2f);
 
             token = strtok(NULL, ",");
             slider->setCurveType(token[0]);
             
+            // Adding curve points
             char *pointsString = strchr(token, '|');
             if (pointsString != NULL) {
-                pointsString++; // Move past the '|'
+                pointsString++;
 
                 while ((token = strtok(pointsString, "|")) != NULL) {
-                    pointsString = NULL; // Set to NULL for subsequent calls to strtok
+                    pointsString = NULL;
 
                     int pointX, pointY;
                     sscanf(token, "%d:%d", &pointX, &pointY);
@@ -307,3 +312,4 @@ static void LoadBeatmap(char* path) {
 
 	fclose(file);
 }
+
