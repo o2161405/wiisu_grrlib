@@ -2,15 +2,15 @@
 
 #include <ogc/lwp_watchdog.h>
 
-class Clock {
+class BeatmapClock {
 public:
-    Clock() {
+    BeatmapClock() {
         isRunning = false;
         startTime = 0;
         currentTime = 0;
     }
 
-    ~Clock() = default;
+    ~BeatmapClock() = default;
 
     void start() {
         if (!isRunning) {

@@ -35,7 +35,7 @@ public:
     }
 
     void draw() override {
-        GRRLIB_Circle(x + 64, y + 48, 10, 0xED6911FF, true);
+        GRRLIB_Circle(x + 64, y + 48, 10, 0xFFFFFFFF, true);
     }
 };
 
@@ -49,7 +49,25 @@ public:
     }
 
     void draw() override {
-        GRRLIB_Circle(x + 64, y + 48, 10, 0x0EE3A3FF, true);
+        switch (curveType) {
+			case 'B':
+				GRRLIB_Circle(x + 64, y + 48, 10, 0xFF0000FF, true);
+				break;
+			case 'L':
+				GRRLIB_Circle(x + 64, y + 48, 10, 0x00FF00FF, true);
+                
+                for (auto& point : curvePoints) {
+					GRRLIB_Circle(point.first + 64, point.second + 48, 5, 0x00FF00FF, true);
+				}
+
+				break;
+			case 'P':
+				GRRLIB_Circle(x + 64, y + 48, 10, 0x0000FFFF, true);
+				break;
+			case 'C':
+				GRRLIB_Circle(x + 64, y + 48, 10, 0xFFE600FF, true);
+				break;
+		}
     }
 
     void setCurveType(char curveType) {

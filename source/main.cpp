@@ -19,6 +19,8 @@
 #include "Clock.hpp"
 #include "Wiimote.hpp"
 
+#define APPROACH_RATE_MS 400
+
 static u8 CalculateFrameRate(void);
 static bool isHoveringOverLogo(int cursorX, int cursorY);
 static void drawCursor(int x, int y);
@@ -27,7 +29,6 @@ static void GetSongFolder(void);
 static void LoadBeatmap(char* path);
 
 float wiisu_logo_scale = 1.0f;
-float normalized_logo_scale = 0.0f;
 
 enum class ScreenState {
     MENU,
@@ -41,7 +42,7 @@ std::vector<std::string> folderNames;
 
 int songSelection = 0;
 
-Clock beatmapclock;
+BeatmapClock beatmapclock;
 
 int main(int argc, char **argv) {
     bool ShowFPS = true;
@@ -126,8 +127,8 @@ int main(int argc, char **argv) {
                 int currentTime = beatmapclock.getTime();
 
                 for (int i = 0; i < static_cast<int>(hitObjects.size()); i++) {
-                    if (hitObjects[i]->getTime() < currentTime) {
-						hitObjects[i]->draw();
+                    if (abs(hitObjects[i]->getTime() - currentTime) < APPROACH_RATE_MS) {
+                        hitObjects[i]->draw();
 					}
 				}
 
@@ -268,6 +269,7 @@ static void LoadBeatmap(char* path) {
 		int time = atoi(token);
         token = strtok(NULL, ",");
         int type = atoi(token);
+        token = strtok(NULL, ",");
 
         std::string binary = std::bitset<8>(type).to_string();
         if (binary[7] == '1') { // Circle
@@ -278,11 +280,18 @@ static void LoadBeatmap(char* path) {
 
             token = strtok(NULL, ",");
             slider->setCurveType(token[0]);
+            
+            char *pointsString = strchr(token, '|');
+            if (pointsString != NULL) {
+                pointsString++; // Move past the '|'
 
-            while ((token = strtok(NULL, "|")) != NULL) {
-                int pointX, pointY;
-                sscanf(token, "%d:%d", &pointX, &pointY);
-                slider->addCurvePoint(pointX, pointY);
+                while ((token = strtok(pointsString, "|")) != NULL) {
+                    pointsString = NULL; // Set to NULL for subsequent calls to strtok
+
+                    int pointX, pointY;
+                    sscanf(token, "%d:%d", &pointX, &pointY);
+                    slider->addCurvePoint(pointX, pointY);
+                }
             }
 
             hitObjects.push_back(slider);
