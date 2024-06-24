@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <string>
+#include <cstring>
 
 #include <vector>
 #include <memory>
@@ -17,6 +18,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 #include "HitObject.hpp"
 #include "Clock.hpp"
@@ -27,7 +29,6 @@ static bool isHoveringOverLogo(int cursorX, int cursorY);
 static void drawCursor(int x, int y);
 static void InitializeGRRLIB(void);
 static void GetSongFolder(void);
-static void LoadBeatmap(char *path);
 
 float wiisu_logo_scale = 1.0f;
 
@@ -44,6 +45,7 @@ std::vector<std::string> folderNames;
 int songSelection = 0;
 
 BeatmapClock beatmapclock;
+BeatmapHandler beatmaphandler;
 
 double approachRate = 9.5f;
 double circleSize = 2.5f;
@@ -119,7 +121,8 @@ int main(int argc, char **argv) {
 
                 if (wiimote.IsButtonPressed(WPAD_BUTTON_A)) {
                     // Replace this with the path to the song folder
-                    LoadBeatmap("sd:/apps/wiisu/Songs/1047286 Dance Gavin Dance - Son of Robot/Dance Gavin Dance - Son of Robot (Alumetri) [Catharsis].osu");
+                    //LoadBeatmap("sd:/apps/wiisu/Songs/1047286 Dance Gavin Dance - Son of Robot/Dance Gavin Dance - Son of Robot (Alumetri) [Catharsis].osu");
+                    beatmaphandler.loadBeatmap("sd:/apps/wiisu/Songs/1047286 Dance Gavin Dance - Son of Robot/Dance Gavin Dance - Son of Robot (Alumetri) [Catharsis].osu");
                     CurrentScreen = ScreenState::GAME;
                     beatmapclock.start();
                 }
@@ -132,8 +135,8 @@ int main(int argc, char **argv) {
                 beatmapclock.update();
                 int currentTime = beatmapclock.getTime();
 
-                for (int i = 0; i < static_cast<int>(hitObjects.size()); i++) {
-                    hitObjects[i]->draw(currentTime);
+                for (int i = 0; i < static_cast<int>(beatmaphandler.getHitObjectCount()); i++) {
+                    beatmaphandler.getHitObject(i)->draw(currentTime);
                 }
 
                 char buffer[255];
@@ -241,75 +244,3 @@ static void GetSongFolder(void) {
         closedir(dir);
     }
 }
-
-static void LoadBeatmap(char *path) {
-
-    // Clear the hit objects vector
-    hitObjects.clear();
-
-    FILE* file = fopen(path, "r");
-
-    int hitObjectIndex = 0;
-    char line[255];
-
-    // Skip to the HitObjects section
-    while (fgets(line, 255, file) != NULL) {
-        line[strcspn(line, "\n")] = 0;
-        if (strstr(line, "HitObjects") != NULL) {
-            break;
-        }
-        hitObjectIndex++;
-    }
-
-    // Add hit objects to the vector
-    while (fgets(line, sizeof(line), file)) {
-
-        // Parse the line
-        char* token = strtok(line, ",");
-        int x = atoi(token);
-        token = strtok(NULL, ",");
-        int y = atoi(token);
-        token = strtok(NULL, ",");
-        int time = atoi(token);
-        token = strtok(NULL, ",");
-        int type = atoi(token);
-        token = strtok(NULL, ",");
-
-        std::string binary = std::bitset<8>(type).to_string();
-        if (binary[7] == '1') { // Circle
-            std::shared_ptr<Circle> circle = std::make_shared<Circle>(x, y, time, circleSize, approachRate, overallDifficulty, hpDrainRate);
-            hitObjects.push_back(circle);
-        } else if (binary[6] == '1') { // Slider
-            std::shared_ptr<Slider> slider = std::make_shared<Slider>(x, y, time, 2.5f, 9.5f, 9.2f, 4.2f);
-
-            token = strtok(NULL, ",");
-            slider->setCurveType(token[0]);
-            
-            // Adding curve points
-            char *pointsString = strchr(token, '|');
-            if (pointsString != NULL) {
-                pointsString++;
-
-                while ((token = strtok(pointsString, "|")) != NULL) {
-                    pointsString = NULL;
-
-                    int pointX, pointY;
-                    sscanf(token, "%d:%d", &pointX, &pointY);
-                    slider->addCurvePoint(pointX, pointY);
-                }
-            }
-
-            hitObjects.push_back(slider);
-        }
-
-    }
-
-    // Normalize time to 0
-    int firstObjectTime = hitObjects[0]->getTime();
-    for (int i = 0; i < static_cast<int>(hitObjects.size()); i++) {
-        hitObjects[i]->setTime(hitObjects[i]->getTime() - firstObjectTime);
-    }
-
-    fclose(file);
-}
-
