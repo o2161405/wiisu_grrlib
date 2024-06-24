@@ -120,8 +120,7 @@ int main(int argc, char **argv) {
                 if (wiimote.IsButtonPressed(WPAD_BUTTON_UP)) songSelection -= 1;
 
                 if (wiimote.IsButtonPressed(WPAD_BUTTON_A)) {
-                    // Replace this with the path to the song folder
-                    //LoadBeatmap("sd:/apps/wiisu/Songs/1047286 Dance Gavin Dance - Son of Robot/Dance Gavin Dance - Son of Robot (Alumetri) [Catharsis].osu");
+                    // Replace this later
                     beatmaphandler.loadBeatmap("sd:/apps/wiisu/Songs/1047286 Dance Gavin Dance - Son of Robot/Dance Gavin Dance - Son of Robot (Alumetri) [Catharsis].osu");
                     CurrentScreen = ScreenState::GAME;
                     beatmapclock.start();
