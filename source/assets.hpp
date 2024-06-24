@@ -1,5 +1,7 @@
 #pragma once
 
+#include <grrlib.h>
+
 #include "wiisu_ttf.h"
 #include "Background_png.h"
 #include "settings_png.h"
@@ -12,6 +14,7 @@
 #include "SongBackground_png.h"
 #include "hitcircle_png.h"
 #include "approachcircle_png.h"
+
 
 static GRRLIB_ttfFont* Font = GRRLIB_LoadTTF(wiisu_ttf, wiisu_ttf_size);
 

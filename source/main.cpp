@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
     fatInitDefault();
 
     #include "Assets.hpp"
-
+    
     ScreenState CurrentScreen = ScreenState::MENU;
 
     Wiimote wiimote;

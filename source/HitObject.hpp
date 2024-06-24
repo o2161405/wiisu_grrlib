@@ -1,9 +1,10 @@
-#pragma once
-
 #include <vector>
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <memory>
+
+#include <grrlib.h>
 
 class HitObject {
 public:
@@ -25,24 +26,13 @@ public:
         this->time = time;
     }
 
-    int calculateOpacity(int currentTime) {
+    int calculateOpacity(int currentTime) { // https://osu.ppy.sh/wiki/en/Beatmap/Approach_rate
 
-        // https://osu.ppy.sh/wiki/en/Beatmap/Approach_rate
+        int absDiff = abs(ApproachRate - 5.0);
+        int factor = ApproachRate < 5.0 ? 1 : -1; // Flag for positive or negative scaling
 
-        int preempt = 0;
-        int fadeIn = 0;
-        int absApproachRate = abs(ApproachRate - 5);
-
-        if (ApproachRate < 5) {
-            preempt = 1200 + 600 * absApproachRate / 5;
-            fadeIn = 800 + 400 * absApproachRate / 5;
-        } else if (ApproachRate == 5) {
-            preempt = 1200;
-            fadeIn = 800;
-        } else {
-            preempt = 1200 - 750 * absApproachRate / 5;
-            fadeIn = 800 - 500 * absApproachRate / 5;
-        }
+        int preempt = 1200 + 600 * factor * absDiff / 5;
+        int fadeIn = 800 + 400 * factor * absDiff / 5;
 
         if (currentTime < time - preempt || currentTime > time + 2 * fadeIn / 3) {
             return 0;
@@ -76,6 +66,7 @@ public:
     void draw(int currentTime) override {
         int RGBA = 0xFFFFFF00 + calculateOpacity(currentTime);
         GRRLIB_Circle(x + 64, y + 48, 10, RGBA, true);
+
     }
 };
 
